@@ -1,27 +1,22 @@
 /*
- * Copyright (C) 2018 SuperiorOS Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+*
+    Copyright (C) 2019-22 The SuperiorOS Project
+    SPDX-License-Identifier: Apache-2.0
+*
+*/
 
 package com.superior.lab.fragments;
 
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.USER_CURRENT;
 
 import android.app.ActivityManagerNative;
 import android.app.UiModeManager;
 import android.content.Context;
 import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.pm.PackageManager;
@@ -59,6 +54,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settings.Utils;
 
 import com.superior.support.colorpicker.ColorPickerPreference;
+import com.android.internal.util.superior.ThemeUtils;
+import com.superior.support.preferences.SystemSettingListPreference;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,8 +64,13 @@ import java.util.List;
 public class ThemesSettings extends SettingsPreferenceFragment implements OnPreferenceChangeListener {
 
     private static final String TAG = "ThemesSettings";
+    private static final String QS_PANEL_STYLE  = "qs_panel_style";
 
     private Context mContext;
+    private Handler mHandler;
+    private IOverlayManager mOverlayManager;
+    private IOverlayManager mOverlayService;
+    private SystemSettingListPreference mQsStyle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,10 @@ public class ThemesSettings extends SettingsPreferenceFragment implements OnPref
         addPreferencesFromResource(R.xml.superior_lab_themes);
 
         mContext = getActivity();
+        mOverlayService = IOverlayManager.Stub.asInterface(ServiceManager.getService(Context.OVERLAY_SERVICE));
+
+        mQsStyle = (SystemSettingListPreference) findPreference(QS_PANEL_STYLE);
+        mCustomSettingsObserver.observe();
 
         final ContentResolver resolver = getActivity().getContentResolver();
         final PreferenceScreen screen = getPreferenceScreen();
@@ -92,8 +98,100 @@ public class ThemesSettings extends SettingsPreferenceFragment implements OnPref
         super.onResume();
     }
 
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver(mHandler);
+    private class CustomSettingsObserver extends ContentObserver {
+
+        CustomSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            Context mContext = getContext();
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_PANEL_STYLE),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(Settings.System.QS_PANEL_STYLE))) {
+                updateQsStyle();
+            }
+        }
+    }
+
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (preference == mQsStyle) {
+            mCustomSettingsObserver.observe();
+            return true;
+        }
         return false;
     }
+
+	private void updateQsStyle() {
+        ContentResolver resolver = getActivity().getContentResolver();
+
+        int qsPanelStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_STYLE , 0, UserHandle.USER_CURRENT);
+
+        if (qsPanelStyle == 0) {
+            setDefaultStyle(mOverlayService);
+        } else if (qsPanelStyle == 1) {
+            setQsStyle(mOverlayService, "com.android.system.qs.outline");
+        } else if (qsPanelStyle == 2 || qsPanelStyle == 3) {
+            setQsStyle(mOverlayService, "com.android.system.qs.twotoneaccent");
+        } else if (qsPanelStyle == 4) {
+            setQsStyle(mOverlayService, "com.android.system.qs.shaded");
+        } else if (qsPanelStyle == 5) {
+            setQsStyle(mOverlayService, "com.android.system.qs.cyberpunk");
+        } else if (qsPanelStyle == 6) {
+            setQsStyle(mOverlayService, "com.android.system.qs.neumorph");
+        } else if (qsPanelStyle == 7) {
+            setQsStyle(mOverlayService, "com.android.system.qs.reflected");
+        } else if (qsPanelStyle == 8) {
+            setQsStyle(mOverlayService, "com.android.system.qs.surround");
+        } else if (qsPanelStyle == 9) {
+            setQsStyle(mOverlayService, "com.android.system.qs.thin");
+        }
+    }
+
+    public static void setDefaultStyle(IOverlayManager overlayManager) {
+        for (int i = 0; i < QS_STYLES.length; i++) {
+            String qsStyles = QS_STYLES[i];
+            try {
+                overlayManager.setEnabled(qsStyles, false, USER_SYSTEM);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void setQsStyle(IOverlayManager overlayManager, String overlayName) {
+        try {
+            for (int i = 0; i < QS_STYLES.length; i++) {
+                String qsStyles = QS_STYLES[i];
+                try {
+                    overlayManager.setEnabled(qsStyles, false, USER_SYSTEM);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            overlayManager.setEnabled(overlayName, true, USER_SYSTEM);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static final String[] QS_STYLES = {
+        "com.android.system.qs.outline",
+        "com.android.system.qs.twotoneaccent",
+        "com.android.system.qs.shaded",
+        "com.android.system.qs.cyberpunk",
+        "com.android.system.qs.neumorph",
+        "com.android.system.qs.reflected",
+        "com.android.system.qs.surround",
+        "com.android.system.qs.thin"
+    };
 }

@@ -100,6 +100,8 @@
     <string name="reset">Reset</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="default_string">Default</string>
+    <string name="none_string">None</string>
 
     <!-- Network traffic -->
     <string name="network_traffic_title">Network traffic indicator</string>
@@ -388,4 +390,15 @@
     <string name="theme_customization_lock_clock_title">Lockscreen clock font</string>
     <string name="theme_customization_lock_clock_summary">Set LS clock font style</string>
 
+    <!-- Quick settings styling -->
+    <string name="qs_styles_title">Combined QS Element Styles</string>
+    <string name="qs_outline">Outline</string>
+    <string name="qs_two_tone">Two-Tone Accent</string>
+    <string name="qs_color_pop">Color Pop</string>
+    <string name="qs_shaded">Shaded</string>
+    <string name="qs_cyberpunk">Cyberpunk</string>
+    <string name="qs_neumorph">Neumorph</string>
+    <string name="qs_reflected">Reflected</string>
+    <string name="qs_surround">Surround</string>
+    <string name="qs_thin">ThinLine</string>
 </resources>
