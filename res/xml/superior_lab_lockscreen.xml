@@ -40,6 +40,12 @@
         android:summary="@string/pulse_ambient_light_summary"
         android:fragment="com.superior.lab.fragments.PulseAmbientLightSettings" />
 
+    <com.superior.support.preferences.SystemSettingSwitchPreference
+        android:key="ambient_wake_gestures"
+        android:title="@string/ambient_wake_gestures_title"
+        android:summary="@string/ambient_wake_gestures_summary"
+        android:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
