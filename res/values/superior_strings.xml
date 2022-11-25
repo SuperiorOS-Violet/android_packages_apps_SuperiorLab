@@ -74,6 +74,10 @@
     <string name="device_merlinx_description">merlinx | Soni Dharama</string>
     <string name="device_begonia">Redmi Note 8 Pro</string>
     <string name="device_begonia_description">begonia | Ayush Singh</string>
+    <string name="device_spes">Redmi Note 11</string>
+    <string name="device_spes_description">spes | Daniel Enweazu</string>
+    <string name="device_sweet">Redmi Note 10 Pro</string>
+    <string name="device_sweet_description">sweet | Unsatifsed27</string>
 
     <!-- Categories -->
     <string name="team_title">About Team</string>
