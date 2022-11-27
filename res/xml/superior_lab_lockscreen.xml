@@ -63,6 +63,12 @@
             android:title="@string/fprint_error_vib_title"
             android:summary="@string/fprint_error_vib_summary"
             android:persistent="true" />
+    </PreferenceCategory>
+
+    <!-- Udfps options -->
+    <PreferenceCategory
+        android:key="udfps_category"
+        android:title="@string/udfps_category">
 
         <Preference
             android:key="udfps_settings"
